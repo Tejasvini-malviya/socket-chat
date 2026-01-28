@@ -1,0 +1,17 @@
+{
+  "name": "socket-chat",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix Backend && npm install --prefix Frontend",
+    "build": "npm install --prefix Backend && npm install --prefix Frontend && npm run build --prefix Frontend",
+    "start": "concurrently \"npm run start --prefix Backend\" \"npm run dev --prefix Frontend\"",
+    "start:backend": "npm run start --prefix Backend",
+    "start:frontend": "npm run dev --prefix Frontend",
+    "dev": "concurrently \"npm run dev --prefix Backend\" \"npm run dev --prefix Frontend\""
+  },
+  "description": "Socket Chat Application",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
