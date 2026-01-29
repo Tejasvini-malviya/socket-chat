@@ -15,14 +15,12 @@ const signup = async (req, res) => {
     }
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      return res
-        .status(400)
-        .json({ message: "Invalid email format" });
+      return res.status(400).json({ message: "Invalid email format" });
     }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (existingUser) {
@@ -30,7 +28,8 @@ const signup = async (req, res) => {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
     const newUser = await prisma.user.create({
@@ -38,7 +37,7 @@ const signup = async (req, res) => {
         fullName,
         email,
         password: hashedPassword,
-      }
+      },
     });
 
     // Remove password from response
@@ -46,11 +45,10 @@ const signup = async (req, res) => {
 
     return res.status(201).json({
       message: "User created successfully",
-      user: userWithoutPassword
+      user: userWithoutPassword,
     });
-
   } catch (error) {
-    console.error("Signup error:", error);
+    console.error("Error in Signup controller:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -64,4 +62,3 @@ const logout = async (req, res) => {
 };
 
 module.exports = { signup, login, logout };
-
