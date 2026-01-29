@@ -17,7 +17,8 @@ const prisma = new PrismaClient({
 });
 
 // Test the connection
-prisma.$connect()
+prisma
+  .$connect()
   .then(() => console.log("Database connection successful"))
   .catch((err) => console.error("Database connection failed:", err));
 
