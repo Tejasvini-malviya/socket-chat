@@ -14,7 +14,7 @@ const generateToken = (userId, res) => {
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
     httpOnly: true, // XSS attacks se bachne ke liye - client side se access nahi ho sakta
     sameSite: "strict", // CSRF attacks se protection ke liye
-    secure: process.env.NODE_ENV === "production"?false:True, // Production mein HTTPS chahiye
+    secure: process.env.NODE_ENV === "production" ? true : false, // Production mein HTTPS chahiye
   });
 
   return token;

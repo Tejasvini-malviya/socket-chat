@@ -13,5 +13,8 @@
   "description": "Socket Chat Application",
   "devDependencies": {
     "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "resend": "^6.9.1"
   }
 }

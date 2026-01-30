@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const prisma = require("../lib/db.js");
+const { generateToken } = require("../lib/utils.js");
 
 const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -40,6 +41,9 @@ const signup = async (req, res) => {
       },
     });
 
+    // Generate token and set cookie
+    generateToken(newUser.id, res);
+
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
 
@@ -51,6 +55,7 @@ const signup = async (req, res) => {
     console.error("Error in Signup controller:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
+
 };
 
 const login = async (req, res) => {
