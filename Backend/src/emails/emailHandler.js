@@ -1,13 +1,13 @@
-import { resendClient, sender } from "../lib/resend.js";
-import { emailTemplate } from "./emailTemplate.js"; 
+const { resendClient, sender } = require("../lib/resend.js");
+const { emailTemplate } = require("./emailTemplate.js");
 
-export const sendWelcomeEmail = async (email, name, clientURL) => {
+const sendWelcomeEmail = async (email, name, clientURL) => {
   try {
     const { data, error } = await resendClient.emails.send({
       from: `${sender.name} <${sender.email}>`,
       to: email,
       subject: "Welcome to My Chat App",
-      html: emailTemplate(name,clientURL),
+      html: emailTemplate(name, clientURL),
     });
 
     if (error) {
@@ -21,3 +21,5 @@ export const sendWelcomeEmail = async (email, name, clientURL) => {
     throw error;
   }
 };
+
+module.exports = { sendWelcomeEmail };

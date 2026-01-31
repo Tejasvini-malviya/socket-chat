@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const prisma = require("../lib/db.js");
 const { generateToken } = require("../lib/utils.js");
+const { sendWelcomeEmail } = require("../emails/emailHandler.js");
 
 const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -47,6 +48,14 @@ const signup = async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
 
+    // Send welcome email to user (non-blocking)
+    try {
+      await sendWelcomeEmail(newUser.email, newUser.fullName, process.env.CLIENT_URL);
+    } catch (err) {
+      console.error("Error sending welcome email:", err);
+      // Continue even if email fails
+    }
+
     return res.status(201).json({
       message: "User created successfully",
       user: userWithoutPassword,
@@ -55,15 +64,56 @@ const signup = async (req, res) => {
     console.error("Error in Signup controller:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-
 };
 
 const login = async (req, res) => {
-  res.send("login endpoint");
+  const { email, password } = req.body;
+
+  try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Check password
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Generate token and set cookie
+    generateToken(user.id, res);
+
+    // Remove password from response
+    const { password: _, ...userWithoutPassword } = user;
+
+    return res.status(200).json({
+      message: "Login successful",
+      user: userWithoutPassword,
+    });
+  } catch (error) {
+    console.error("Error in Login controller:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 const logout = async (req, res) => {
-  res.send("logout endpoint");
+  try {
+    res.cookie("jwt", "", { maxAge: 0 });
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Error in Logout controller:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 module.exports = { signup, login, logout };
