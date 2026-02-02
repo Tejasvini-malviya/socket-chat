@@ -1,4 +1,4 @@
-export const emailTemplate = (name, clientURL) => `
+const emailTemplate = (name, clientURL) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,3 +23,5 @@ export const emailTemplate = (name, clientURL) => `
 </body>
 </html>
 `;
+
+module.exports = { emailTemplate };

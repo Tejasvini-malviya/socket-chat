@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 const prisma = require("../lib/db.js");
+const env = require("../lib/env.js");
 const { generateToken } = require("../lib/utils.js");
-
+const { sendWelcomeEmail } = require("../emails/emailHandler.js");
 const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
 
@@ -41,6 +42,13 @@ const signup = async (req, res) => {
       },
     });
 
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(newUser.email, newUser.fullName, env.CLIENT_URL);
+    } catch (error) {
+      console.warn("Failed to send welcome email:", error.message);
+    }
+
     // Generate token and set cookie
     generateToken(newUser.id, res);
 
@@ -55,7 +63,6 @@ const signup = async (req, res) => {
     console.error("Error in Signup controller:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-
 };
 
 const login = async (req, res) => {

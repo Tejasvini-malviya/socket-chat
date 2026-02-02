@@ -1,10 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 const { Pool } = require("pg");
+const env = require("./env.js");
 
 // Create a PostgreSQL connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: env.DATABASE_URL,
 });
 
 // Create Prisma adapter
@@ -13,13 +14,16 @@ const adapter = new PrismaPg(pool);
 // Create Prisma client with adapter
 const prisma = new PrismaClient({
   adapter,
-  log: ["query", "info", "warn", "error"], // Enable logging to see SQL queries
+  log: env.NODE_ENV === "production" ? ["error"] : ["query", "info", "warn", "error"],
 });
 
 // Test the connection
 prisma
   .$connect()
-  .then(() => console.log("Database connection successful"))
-  .catch((err) => console.error("Database connection failed:", err));
+  .then(() => console.log("✓ Database connection successful"))
+  .catch((err) => {
+    console.error("✗ Database connection failed:", err.message);
+    process.exit(1);
+  });
 
 module.exports = prisma;
