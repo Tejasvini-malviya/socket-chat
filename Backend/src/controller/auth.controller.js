@@ -127,4 +127,35 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, logout };
+const updateProfile = async (req, res) => {
+  const { profilePic } = req.body;
+
+  try {
+    if (!profilePic) {
+      return res.status(400).json({ message: "Profile picture is required" });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: { profilePic },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        profilePic: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in updateProfile controller:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { signup, login, logout, updateProfile };
