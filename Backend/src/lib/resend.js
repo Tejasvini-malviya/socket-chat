@@ -9,3 +9,5 @@ const sender = {
 };
 
 module.exports = { resendClient, sender };
+
+module.exports = { resendClient, sender };

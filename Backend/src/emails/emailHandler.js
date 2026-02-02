@@ -1,6 +1,9 @@
 const { resendClient, sender } = require("../lib/resend.js");
 const { emailTemplate } = require("./emailTemplate.js");
+const { resendClient, sender } = require("../lib/resend.js");
+const { emailTemplate } = require("./emailTemplate.js");
 
+const sendWelcomeEmail = async (email, name, clientURL) => {
 const sendWelcomeEmail = async (email, name, clientURL) => {
   try {
     const { data, error } = await resendClient.emails.send({
@@ -22,5 +25,7 @@ const sendWelcomeEmail = async (email, name, clientURL) => {
     throw error;
   }
 };
+
+module.exports = { sendWelcomeEmail };
 
 module.exports = { sendWelcomeEmail };
