@@ -77,8 +77,9 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    // Validate input
     if (!email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
     // Find user by email
@@ -87,6 +88,7 @@ const login = async (req, res) => {
     });
 
     if (!user) {
+      console.warn(`Login attempt failed: User not found for email: ${email}`);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -94,6 +96,7 @@ const login = async (req, res) => {
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
+      console.warn(`Login attempt failed: Incorrect password for email: ${email}`);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -103,12 +106,13 @@ const login = async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
+    console.log(`User logged in successfully: ${email}`);
     return res.status(200).json({
       message: "Login successful",
       user: userWithoutPassword,
     });
   } catch (error) {
-    console.error("Error in Login controller:", error);
+    console.error("Error in Login controller:", error.message);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
