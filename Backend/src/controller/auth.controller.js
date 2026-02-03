@@ -3,6 +3,7 @@ const prisma = require("../lib/db.js");
 const env = require("../lib/env.js");
 const { generateToken } = require("../lib/utils.js");
 const { sendWelcomeEmail } = require("../emails/emailHandler.js");
+const cloudinary = require("../lib/cloudinary.js");
 const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
 
@@ -42,7 +43,7 @@ const signup = async (req, res) => {
       },
     });
 
-    // Send welcome email
+    // Send welcome email (non-blocking)
     try {
       await sendWelcomeEmail(newUser.email, newUser.fullName, env.CLIENT_URL);
     } catch (error) {
@@ -54,14 +55,6 @@ const signup = async (req, res) => {
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
-
-    // Send welcome email to user (non-blocking)
-    try {
-      await sendWelcomeEmail(newUser.email, newUser.fullName, process.env.CLIENT_URL);
-    } catch (err) {
-      console.error("Error sending welcome email:", err);
-      // Continue even if email fails
-    }
 
     return res.status(201).json({
       message: "User created successfully",
@@ -134,23 +127,17 @@ const updateProfile = async (req, res) => {
     if (!profilePic) {
       return res.status(400).json({ message: "Profile picture is required" });
     }
-
+    const uploadResponse = await cloudinary.uploader.upload(profilePic);
     const updatedUser = await prisma.user.update({
       where: { id: req.user.id },
-      data: { profilePic },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        profilePic: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      data: { profilePic: uploadResponse.secure_url },
     });
+
+    const { password: _, ...userWithoutPassword } = updatedUser;
 
     return res.status(200).json({
       message: "Profile updated successfully",
-      user: updatedUser,
+      user: userWithoutPassword,
     });
   } catch (error) {
     console.error("Error in updateProfile controller:", error.message);

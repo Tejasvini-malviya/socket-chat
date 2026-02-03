@@ -7,4 +7,5 @@ router.post("/signup", controller.signup);
 router.post("/login", controller.login);
 router.post("/logout", controller.logout);
 router.put("/update-profile",protectedRoute,controller.updateProfile);
+router.get("/check",protectedRoute,(req,res)=>res.status(200).json(req.user));
 module.exports = router;
