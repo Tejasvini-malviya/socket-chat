@@ -1,5 +1,6 @@
 const express = require("express");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 const env = require("./lib/env.js");
 const prisma = require("./lib/db.js");
 const authRoutes = require("./routes/auth.route.js");
@@ -9,6 +10,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
