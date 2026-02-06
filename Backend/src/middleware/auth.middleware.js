@@ -9,11 +9,13 @@ const protectedRoute = async (req, res, next) => {
             return res
                 .status(401)
                 .json({ message: "Unauthorized-No Token Provided" });
-        const decoded = jwt.verify(token, env.JWT_SECRET);
-        if (!decoded)
-            return res
-                .status(401)
-                .json({ message: "Unauthorized-No Token Provided" });
+        let decoded;
+        try {
+            decoded = jwt.verify(token, env.JWT_SECRET);
+        } catch (err) {
+            // Invalid or expired token
+            return res.status(401).json({ message: "Unauthorized-Invalid Token" });
+        }
 
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         if (!user) return res.status(404).json({ message: "user not found" });

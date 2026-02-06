@@ -50,8 +50,8 @@ const signup = async (req, res) => {
       console.warn("Failed to send welcome email:", error.message);
     }
 
-    // Generate token and set cookie
-    generateToken(newUser.id, res);
+    // Generate token, set cookie, and return token in response body for dev clients
+    const token = generateToken(newUser.id, res);
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = newUser;
@@ -59,6 +59,7 @@ const signup = async (req, res) => {
     return res.status(201).json({
       message: "User created successfully",
       user: userWithoutPassword,
+      token,
     });
   } catch (error) {
     console.error("Error in Signup controller:", error);
@@ -93,8 +94,8 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate token and set cookie
-    generateToken(user.id, res);
+    // Generate token, set cookie, and return token in response body for dev clients
+    const token = generateToken(user.id, res);
 
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
@@ -103,6 +104,7 @@ const login = async (req, res) => {
     return res.status(200).json({
       message: "Login successful",
       user: userWithoutPassword,
+      token,
     });
   } catch (error) {
     console.error("Error in Login controller:", error.message);

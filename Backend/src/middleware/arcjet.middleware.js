@@ -11,18 +11,35 @@ const arcjetProtection = async (req, res, next) => {
       if (decision.reason.isRateLimit()) {
         return res.status(429).json({ error: "Too Many Requests" });
       } else if (decision.reason.isBot()) {
-        return res.status(403).json({ error: "No bots allowed" });
+        if (env.NODE_ENV !== "production" || env.ARCJET_ENV === "DRY_RUN") {
+          console.warn("Arcjet flagged a bot request but running in non-production/DRY_RUN; allowing request.");
+        } else {
+          return res.status(403).json({ error: "No bots allowed" });
+        }
       }
 
-      return res.status(403).json({ error: "Forbidden" });
+      // For other denial reasons, allow in non-production or DRY_RUN to avoid blocking local dev
+      if (env.NODE_ENV !== "production" || env.ARCJET_ENV === "DRY_RUN") {
+        console.warn("Arcjet returned a denial reason but running in non-production/DRY_RUN; allowing request.");
+      } else {
+        return res.status(403).json({ error: "Forbidden" });
+      }
     }
 
     if (decision.ip?.isHosting?.()) {
-      return res.status(403).json({ error: "Forbidden" });
+      if (env.NODE_ENV !== "production" || env.ARCJET_ENV === "DRY_RUN") {
+        console.warn("Arcjet flagged hosting IP but running in non-production/DRY_RUN; allowing request.");
+      } else {
+        return res.status(403).json({ error: "Forbidden" });
+      }
     }
 
     if (decision.results?.some(isSpoofedBot)) {
-      return res.status(403).json({ error: "Forbidden" });
+      if (env.NODE_ENV !== "production" || env.ARCJET_ENV === "DRY_RUN") {
+        console.warn("Arcjet detected spoofed bot results but running in non-production/DRY_RUN; allowing request.");
+      } else {
+        return res.status(403).json({ error: "Forbidden" });
+      }
     }
 
     return next();
