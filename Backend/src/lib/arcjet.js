@@ -1,15 +1,13 @@
 const arcjet = require("@arcjet/node").default;
 const { shield, detectBot, slidingWindow } = require("@arcjet/node");
 const env = require("./env.js");
-
 if (!env.ARCJET_KEY) {
   console.warn("ARCJET_KEY is not set. Arcjet protection is disabled.");
   module.exports = null;
   return;
 }
 
-const mode = (env.ARCJET_ENV === "DRY_RUN") ? "DRY_RUN" : "LIVE";
-
+const mode = env.ARCJET_ENV === "DRY_RUN" ? "DRY_RUN" : "LIVE";
 const aj = arcjet({
   key: env.ARCJET_KEY,
   rules: [
